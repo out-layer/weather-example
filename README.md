@@ -4,7 +4,7 @@
 
 WASI component that fetches real-time weather data from OpenWeather API.
 
-> 🚀 **Ready to test on NEAR Testnet!** Pre-configured secrets available at `github.com/zavodil/weather-ark` (profile: `default`, owner: `zavodil2.testnet`). Skip to [Quick Start](#quick-start-testnet-with-pre-configured-secrets-) to try it now!
+> 🚀 **Ready to test on NEAR Testnet!** Pre-configured secrets available at `github.com/out-layer/weather-example` (profile: `default`, owner: `zavodil2.testnet`). Skip to [Quick Start](#quick-start-testnet-with-pre-configured-secrets-) to try it now!
 
 ## Features
 
@@ -44,13 +44,22 @@ WASI component that fetches real-time weather data from OpenWeather API.
 ## Building
 
 ```bash
+./build.sh
+```
+
+The script adds the `wasm32-wasip2` target if it is missing, builds in release mode,
+and copies the result to `./weather-example.wasm`.
+
+Equivalent by hand:
+
+```bash
 # Add WASI P2 target
 rustup target add wasm32-wasip2
 
 # Build
 cargo build --target wasm32-wasip2 --release
 
-# Output: target/wasm32-wasip2/release/weather-ark.wasm
+# Output: target/wasm32-wasip2/release/weather-example.wasm
 ```
 
 ## Getting OpenWeather API Key
@@ -72,7 +81,7 @@ cd ../wasi-test-runner
 
 # Test with your API key
 cargo run --release -- \
-  --wasm ../weather-ark/target/wasm32-wasip2/release/weather-ark.wasm \
+  --wasm ../weather-example/target/wasm32-wasip2/release/weather-example.wasm \
   --input '{"city":"London"}' \
   --env OPENWEATHER_API_KEY=your_api_key_here
 ```
@@ -82,7 +91,7 @@ cargo run --release -- \
 ```bash
 echo '{"city":"Tokyo","units":"metric"}' | \
   wasmtime --env OPENWEATHER_API_KEY=your_api_key_here \
-  target/wasm32-wasip2/release/weather-ark.wasm
+  target/wasm32-wasip2/release/weather-example.wasm
 ```
 
 ## Deploying to NEAR OutLayer
@@ -95,12 +104,12 @@ echo '{"city":"Tokyo","units":"metric"}' | \
 # Test weather for any city right now (no setup needed!)
 near contract call-function as-transaction outlayer.testnet request_execution json-args '{
     "code_source": {
-      "repo": "https://github.com/zavodil/weather-ark",
+      "repo": "https://github.com/out-layer/weather-example",
       "commit": "main",
       "build_target": "wasm32-wasip2"
     },
     "secrets_ref": {
-      "repo": "github.com/zavodil/weather-ark",
+      "repo": "github.com/out-layer/weather-example",
       "profile": "default",
       "account_id": "zavodil2.testnet"
     },
@@ -131,7 +140,7 @@ Execution result: https://testnet.nearblocks.io/txns/HreK5ResxyQpRznteJLbyPWQvZM
 ```
 
 **Available pre-configured secrets:**
-- **Repo**: `github.com/zavodil/weather-ark`
+- **Repo**: `github.com/out-layer/weather-example`
 - **Profile**: `default`
 - **Owner**: `zavodil2.testnet`
 - **Contains**: OpenWeather API key (free tier)
@@ -164,8 +173,7 @@ near call outlayer.testnet request_execution '{
   "code_source": {
     "repo": "https://github.com/your-username/your-repo",
     "commit": "main",
-    "build_target": "wasm32-wasip2",
-    "build_path": "wasi-examples/weather-ark"
+    "build_target": "wasm32-wasip2"
   },
   "secrets_ref": {
     "repo": "github.com/your-username/your-repo",
@@ -220,7 +228,7 @@ near view outlayer.testnet get_request '{"request_id": 123}'
          ↓
 ┌─────────────────────────────┐
 │   Worker                    │
-│   1. Compile weather-ark    │
+│   1. Compile weather-example    │
 │   2. Decrypt secrets        │
 │   3. Inject OPENWEATHER_*   │
 │   4. Execute WASM           │
