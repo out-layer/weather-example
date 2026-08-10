@@ -1,6 +1,6 @@
 # Weather Ark - OpenWeather API Integration
 
-> **[Full documentation](https://outlayer.fastnear.com/docs/examples#weather-ark)** on the OutLayer dashboard.
+> **[Full documentation](https://app.outlayer.ai/docs/examples#weather-ark)** on the OutLayer dashboard.
 
 WASI component that fetches real-time weather data from OpenWeather API.
 
