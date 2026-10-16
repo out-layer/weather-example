@@ -4,8 +4,6 @@
 
 WASI component that fetches real-time weather data from OpenWeather API.
 
-> 🚀 **Ready to test on NEAR Testnet!** Pre-configured secrets available at `github.com/out-layer/weather-example` (profile: `default`, owner: `zavodil2.testnet`). Skip to [Quick Start](#quick-start-testnet-with-pre-configured-secrets-) to try it now!
-
 ## Features
 
 - ✅ Real-time weather data for any city
@@ -96,87 +94,33 @@ echo '{"city":"Tokyo","units":"metric"}' | \
 
 ## Deploying to NEAR OutLayer
 
-### Quick Start (Testnet with Pre-configured Secrets) ✨
-
-**Good news!** We've already set up encrypted secrets on testnet, so you can test immediately:
+#### Step 1: Publish the WASM
 
 ```bash
-# Test weather for any city right now (no setup needed!)
-near contract call-function as-transaction outlayer.testnet request_execution json-args '{
-    "code_source": {
-      "repo": "https://github.com/out-layer/weather-example",
-      "commit": "main",
-      "build_target": "wasm32-wasip2"
-    },
-    "secrets_ref": {
-      "repo": "github.com/out-layer/weather-example",
-      "profile": "default",
-      "account_id": "zavodil2.testnet"
-    },
-    "resource_limits": {
-      "max_instructions": 50000000000,
-      "max_memory_mb": 128,
-      "max_execution_seconds": 30
-    },"response_format": "Json",
-    "input_data": "{\"city\":\"London\",\"units\":\"metric\"}"
-  }' prepaid-gas '100.0 Tgas' attached-deposit '0.1 NEAR' sign-as your-account.testnet network-config testnet sign-with-keychain send
+outlayer upload target/wasm32-wasip2/release/weather-example.wasm
+# prints SHA256 and: FastFS URL: https://test.fastfs.io/your.testnet/outlayer.testnet/<sha256>.wasm
+outlayer deploy weather-example <FastFS URL>
 ```
 
-Execution result: https://testnet.nearblocks.io/txns/HreK5ResxyQpRznteJLbyPWQvZMbCyuSvuqLnRr2LhtH
-
-**Try different cities:**
-```bash
-# Tokyo (metric)
---input_data '{"city":"Tokyo","units":"metric"}'
-
-# New York (imperial - Fahrenheit)
---input_data '{"city":"New York","units":"imperial"}'
-
-# Paris
---input_data '{"city":"Paris"}'
-
-# Moscow
---input_data '{"city":"Moscow"}'
-```
-
-**Available pre-configured secrets:**
-- **Repo**: `github.com/out-layer/weather-example`
-- **Profile**: `default`
-- **Owner**: `zavodil2.testnet`
-- **Contains**: OpenWeather API key (free tier)
-
----
-
-### Production Deployment (Your Own Secrets)
-
-#### Step 1: Store API Key as Encrypted Secret
+#### Step 2: Store API Key as Encrypted Secret
 
 ```bash
-# 1. Go to dashboard
-cd ../../dashboard
-npm run dev
-
-# 2. Open http://localhost:3000/secrets
-# 3. Connect wallet
-# 4. Create secret:
-#    - Repo: github.com/your-username/your-repo
-#    - Branch: main (optional)
-#    - Profile: weather-production
-#    - Secrets JSON: {"OPENWEATHER_API_KEY":"your_key_here"}
-#    - Access: AllowAll (or custom conditions)
+outlayer secrets set '{"OPENWEATHER_API_KEY":"your_key_here"}' \
+  --project your.testnet/weather-example --profile weather-production
 ```
 
-#### Step 2: Request Execution
+Or in the dashboard (Secrets page): project `your.testnet/weather-example`, profile
+`weather-production`, secrets JSON `{"OPENWEATHER_API_KEY":"your_key_here"}`, access AllowAll
+(or custom conditions).
+
+#### Step 3: Request Execution
 
 ```bash
 near call outlayer.testnet request_execution '{
-  "code_source": {
-    "repo": "https://github.com/your-username/your-repo",
-    "commit": "main",
-    "build_target": "wasm32-wasip2"
+  "source": {
+    "Project": { "project_id": "your.testnet/weather-example", "version_key": null }
   },
   "secrets_ref": {
-    "repo": "github.com/your-username/your-repo",
     "profile": "weather-production",
     "account_id": "your.testnet"
   },
@@ -185,11 +129,15 @@ near call outlayer.testnet request_execution '{
     "max_memory_mb": 128,
     "max_execution_seconds": 30
   },
+  "response_format": "Json",
   "input_data": "{\"city\":\"Paris\",\"units\":\"metric\"}"
 }' --accountId your.testnet --deposit 0.1
 ```
 
-#### Step 3: Check Result
+**Try different cities** by changing `input_data`: `{"city":"Tokyo","units":"metric"}`,
+`{"city":"New York","units":"imperial"}` (Fahrenheit), `{"city":"Paris"}`.
+
+#### Step 4: Check Result
 
 ```bash
 # Get execution request ID from previous command output
@@ -228,7 +176,7 @@ near view outlayer.testnet get_request '{"request_id": 123}'
          ↓
 ┌─────────────────────────────┐
 │   Worker                    │
-│   1. Compile weather-example    │
+│   1. Fetch WASM, check sha256│
 │   2. Decrypt secrets        │
 │   3. Inject OPENWEATHER_*   │
 │   4. Execute WASM           │
