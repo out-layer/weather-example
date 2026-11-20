@@ -223,7 +223,6 @@ near view outlayer.testnet get_request '{"request_id": 123}'
 
 - Uses WASI Preview 2 (wasm32-wasip2) for HTTP support
 - **API key required**: Must be provided via encrypted secrets
-- Output is always < 900 bytes (NEAR limit)
 - Timeout: 10 seconds for HTTP request
 - Supports all cities in OpenWeather database
 
